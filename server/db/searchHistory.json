@@ -1,6 +1,14 @@
 [
-    {
-        "id:" dfffdf
-        "name":"Atlanta"
-    }
+  {
+    "id": "d4a0ca1e-82e6-4a86-a2cd-ffc3205d7876",
+    "name": "San Diego"
+  },
+  {
+    "id": "bb8635a8-432b-4861-8da6-904dc494f59f",
+    "name": "Miami"
+  },
+  {
+    "id": "dc71739b-0b47-4781-832e-aa811475c41b",
+    "name": "Charleston"
+  }
 ]

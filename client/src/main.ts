@@ -7,8 +7,8 @@ const searchForm: HTMLFormElement = document.getElementById(
 const searchInput: HTMLInputElement = document.getElementById(
   'search-input'
 ) as HTMLInputElement;
-const todayContainer = document.querySelector('#today') as HTMLDivElement;
-const forecastContainer = document.querySelector('#forecast') as HTMLDivElement;
+const todayContainer = document.getElementById('today');
+const forecastContainer = document.getElementById('forecast');
 const searchHistoryContainer = document.getElementById(
   'history'
 ) as HTMLDivElement;
@@ -35,6 +35,7 @@ API Calls
 */
 
 const fetchWeather = async (cityName: string) => {
+  try{
   const response = await fetch('/api/weather/', {
     method: 'POST',
     headers: {
@@ -43,12 +44,16 @@ const fetchWeather = async (cityName: string) => {
     body: JSON.stringify({ cityName }),
   });
 
+  if (!response.ok) {
+    throw new Error('Failed to fetch weather data');
+  }
   const weatherData = await response.json();
 
-  console.log('weatherData: ', weatherData);
-
   renderCurrentWeather(weatherData[0]);
-  renderForecast(weatherData.slice(1));
+  renderForecast(weatherData[1]);
+}catch (error) {
+    console.error('Error fetching weather data:', error);
+  }
 };
 
 const fetchSearchHistory = async () => {
@@ -79,8 +84,7 @@ Render Functions
 const renderCurrentWeather = (currentWeather: any): void => {
   const { city, date, icon, iconDescription, tempF, windSpeed, humidity } =
     currentWeather;
-
-  // convert the following to typescript
+ 
   heading.textContent = `${city} (${date})`;
   weatherIcon.setAttribute(
     'src',
@@ -119,7 +123,7 @@ const renderForecast = (forecast: any): void => {
 
 const renderForecastCard = (forecast: any) => {
   const { date, icon, iconDescription, tempF, windSpeed, humidity } = forecast;
-
+  console.log('card',forecast);
   const { col, cardTitle, weatherIcon, tempEl, windEl, humidityEl } =
     createForecastCard();
 
@@ -130,6 +134,7 @@ const renderForecastCard = (forecast: any) => {
     `https://openweathermap.org/img/w/${icon}.png`
   );
   weatherIcon.setAttribute('alt', iconDescription);
+  weatherIcon.setAttribute('class', 'weather-img');
   tempEl.textContent = `Temp: ${tempF} °F`;
   windEl.textContent = `Wind: ${windSpeed} MPH`;
   humidityEl.textContent = `Humidity: ${humidity} %`;

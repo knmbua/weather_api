@@ -1,6 +1,8 @@
-// Import fs promises version to read and write to our searchHistory.json file
+// Import fs promises version to read and write to our db.json file
 import { promises as fs } from 'fs';
-import {v4} from 'uuid';
+import { v4 } from 'uuid';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 class City {
   id: string;
@@ -12,69 +14,98 @@ class City {
   }
 }
 
-// TODO: Complete the HistoryService class
+// COMPLETED Complete the HistoryService class
 class HistoryService {
-  private filePath = './searchHistory.json';
+  private dbFilePath: string;
+  // COMPLETED Define a private read method that reads from the db.json file - this method will only be accessible within the HistoryService class
 
-  // TODO: Define a private read method that reads from the searchHistory.json file - this method will only be accessible within the HistoryService class
+  constructor() {
+    // Use import.meta.url to get the current file URL and convert it to a path
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    this.dbFilePath = path.join(__dirname, '../../db/searchHistory.json');
+  }
   private async read(): Promise<City[]> {
     try {
-      const rawArray = await fs.readFile(this.filePath, 'utf-8');
-      return JSON.parse(rawArray);
+      // Use fs to read the db.json file
+      const rawArray = await fs.readFile(this.dbFilePath, 'utf-8');
+
+      // Parse the raw JSON data array
+      const cityArray: City[] = JSON.parse(rawArray);
+
+      // Return the parsed array
+      return cityArray;
     } catch (error) {
-      console.error('Error reading search history:', error);
+      console.error('Error reading the searchHisory.json file', error)
       return [];
     }
+    // Using fs will give you unparsed JSON data array
+    // return the parsed array - ie. JSON.parse(rawArray);
   }
 
-  // TODO: Define a write method that writes the updated cities array to the searchHistory.json file
+  // COMPLETE Define a write method that writes the updated cities array to the db.json file
   private async write(cities: City[]): Promise<void> {
     try {
-      await fs.writeFile(this.filePath, JSON.stringify(cities, null, 2));
+      // Convert the cities array to a JSON string
+      const data = JSON.stringify(cities, null, 2);
+
+      // Use fs to overwrite the db.json file with the stringified array of city objects
+      await fs.writeFile(this.dbFilePath, data, 'utf-8');
     } catch (error) {
-      console.error('Error writing to search history:', error);
+      console.error('Error writing to the searchHistory.json file', error);
     }
-  }
- 
-  // TODO: Define a get method that returns an array of city objects, using the read method to retrieve the array from searchHistory.json
-  async getCities(): Promise<City[]> {
-    return await this.read();
+
   }
 
-  // TODO Define an addCity method that adds a city to the searchHistory.json file
-  async addCity(cityName: string): Promise<void> {
+  // Define a get method that returns an array of city objects, using the read method to retrieve the array from db.json
+  async getCities() {
+    // Get the array of cites, using the read method
+    const cityArray = await this.read();
+    return cityArray;
+  }
+
+  // COMPLETED Define an addCity method that adds a city to the db.json file
+  async addCity(city: string) {
+    // Get the array of city objects from db.json, using this.read
     const citiesArray = await this.getCities();
 
-
-    // First use citiesArray.find() to check if there is already a city object matching the city name
-    // If there is, return without continuing the rest of the code below
-    if (citiesArray.find(city => city.name.toLowerCase() === cityName.toLowerCase())) {
+    const existingCity = citiesArray.find((c: any) => c.name === city);
+    if (existingCity) {
       return;
     }
 
-    
-    // Create a city variable that stores a new City object - Pass in the city parameter as an argument
-    
-    // Push the new city object to the citiesArray above
-    const newCity = new City(cityName);
+    // First use citiesArray.find() to check if there is already a city object matching the city name
+    // If there is, return without continuing the rest of the code below
+    const newCity = new City(city);
+
     citiesArray.push(newCity);
-    // Use this.write to overwrite the searchHistory.json file with our new array of city objects
+
     await this.write(citiesArray);
+
+    // Create a city variable that stores a new City object - Pass in the city parameter as an argument
+
+    // Push the new city object to the citiesArray above
+
+    // Use this.write to overwrite the db.json file with our new array of city objects
   }
 
-
-  // * BONUS TODO: Define a removeCity method that removes a city from the searchHistory.json file
-  async removeCity(id: string): Promise<void> {
+  // * BONUS TODO: Define a removeCity method that removes a city from the db.json file
+  async removeCity(id: string) {
     const citiesArray = await this.getCities();
 
-    // Filter out the city object within citiesArray that has an id matching the id above - ie. citiesArray.filter(() => {})
-    const updatedCitiesArray = citiesArray.filter(city => city.id !== id);
-    await this.write(updatedCitiesArray);
+    const filterCity = citiesArray.filter((city: City) => city.id !== id);
 
-    // console.log a confirmation that the city has been removed
-    
-    console.log(`City with ID ${id} has been removed from search history.`);
-  }
-  }
+    await this.write(filterCity);
+    console.log(`city with an id ${id} has been deleted`);
+  //   // Get the cities array
+  //   const citiesArray = await this.getCities();
+
+  //   // Filter out the city object within citiesArray that has an id matching the id above - ie. citiesArray.filter(() => {})
+
+  //   // Use the write method to overwrite the searchHistory.json file
+  //   // console.log a confirmation that the city has been removed
+  // }
+}
+}
 
 export default new HistoryService();
