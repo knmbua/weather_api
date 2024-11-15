@@ -81,9 +81,10 @@ Render Functions
 
 */
 
-const renderCurrentWeather = (currentWeather: any): void => {
+const renderCurrentWeather = (weatherData: any): void => {
   const { city, date, icon, iconDescription, tempF, windSpeed, humidity } =
-    currentWeather;
+    weatherData;
+    
  
   heading.textContent = `${city} (${date})`;
   weatherIcon.setAttribute(

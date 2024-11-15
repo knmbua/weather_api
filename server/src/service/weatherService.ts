@@ -6,6 +6,7 @@ dotenv.config();
 
 
 class WeatherService {
+  [x: string]: any;
   baseURL: string;
   apiKey: string;
 
@@ -25,7 +26,15 @@ class WeatherService {
     const url = this.baseURL + `/forecast?units=imperial&q=${city}&appid=${this.apiKey}`;
     const res = await axios.get(url);
     console.log(res.data);
-    return res.data.list.filter((item: any) => item.dt_txt.includes('12:00:00'));
+    const forecastData = res.data.list.filter((item: any) => item.dt_txt.includes('12:00:00')).map((item: any) => ({
+      date: dayjs(item.dt * 1000).format('MM/DD/YYYY'),
+      tempF: item.main.temp,
+      icon: item.weather[0].icon,
+      iconDescription: item.weather[0].description,
+      windSpeed: item.wind.speed,
+      humidity: item.main.humidity
+    }));
+    return forecastData;
   }
 
   async getCurrentWeatherForCity(city: string) {
